@@ -1,9 +1,9 @@
 /*
 	CSCI 270 Fall 2018
 	Programming Assignment
-	Name   :
-	Email  :
-	USC ID :
+	Name   : Colin Heath
+	Email  : colinjhe@usc.edu
+	USC ID : 8235366620
 */
 #include <iostream>
 #include <vector>
@@ -12,6 +12,14 @@
 
 using namespace std;
 //	You can add any custom classes / helper functions here.
+
+struct TileHealth 
+{
+	int noPowerUp;
+	int onlyP;
+	int onlyD;
+	int bothPD;
+};
 
 int solve(int N, vector<vector<string> > G) 
 {
@@ -24,51 +32,26 @@ int solve(int N, vector<vector<string> > G)
 	Return: the minimum life Brain needs to complete his task.
 */
 
-	int** requiredHealth = new int*[N];
-
+	//Declare an array of the same size as G. The array will hold structs to track the health needed at each tile.
+	TileHealth** requiredHealth = new TileHealth*[N];
 	for(int i = 0; i < N; i++)
 	{
-		requiredHealth[i] = new int[N];
+		requiredHealth[i] = new TileHealth[N];
 
 		for(int j = 0; j < N; j++)
 		{
-			requiredHealth[i][j] = 0;
+			requiredHealth[i][j].noPowerUp = 0;
+			requiredHealth[i][j].onlyP = 0;
+			requiredHealth[i][j].onlyD = 0;
+			requiredHealth[i][j].bothPD = 0;
 		}
 	}
 
-/*
-	Start at bottom-right. Walk up and left to top and leftmost side, then step back along the diagonal.
-	You'll be building up the values in the array. This implementation doesn't involve power-up tiles.
-*/
+	requiredHealth[N-1][N-1].noPowerUp = std::max(1, 1 - std::stoi(G[N-1][N-1]));
 
-	//Start by filling out the outermost segment.
-	requiredHealth[N-1][N-1] = std::max(1, 1 - G[N-1][N-1]);
+	//Fill out the rightmost column and bottommost row, for starters.
 
-	for(int k = N - 2; k >= 0; k--)
-	{
-		requiredHealth[N-1][k] = std::max(1, requiredHealth[N-1][k+1] - G[N-1][k]);
-		requiredHealth[k][N-1] = std::max(1, requiredHealth[k+1][N-1] - G[k][N-1]);
-	}
-
-	for(int l = N - 2; l >= 0; l--)
-	{
-		int valueOut = std::min(requiredHealth[l+1][l], requiredHealth[l][l+1]);
-		requiredHealth[l][l] = std::max(1, valueOut - G[l][l]);
-
-		for(int m = l; m >= 0; m--)
-		{
-			valueOut = std::min(requiredHealth[l+1][m], requiredHealth[l][m+1]);
-			requiredHealth[l][m] = std::max(1, valueOut - G[l][m]);
-		}
-
-		for(int n = l; n >= 0; n--)
-		{
-			valueOut = std::min(requiredHealth[n][l+1], requiredHealth[n+1][l]);
-			requiredHealth[n][l] = std::max(1, valueOut - G[n][l]);
-		}
-	}
-
-	return requiredHealth[0][0];
+	return requiredHealth[0][0].noPowerUp;
 }
 
 //	The main function reads the input and outputs your answer.
